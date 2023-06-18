@@ -19,7 +19,7 @@ function greet(call, callback) {
   callback(null, response);
 }
 
-function greetStream(call, callback) {
+function greetStream(call, _callback) {
   var first_name = call.request.getGreeting().getFirstName();
   var last_name = call.request.getGreeting().getLastName();
 
@@ -47,6 +47,28 @@ function sum(call, callback) {
   callback(null, response);
 }
 
+function primeNumberDecomposition(call, _callback) {
+  var num = call.request.getNumber();
+  let divisor = 2;
+
+  while (num > 1 && num > divisor) {
+    if (num % divisor === 0) {
+      var response = new calc_pb.PrimeNumberDecompositionResponse();
+      response.setDecompositionResult(divisor);
+
+      num = num / divisor;
+
+      call.write(response);
+
+      call.end();
+    } else {
+      divisor++;
+
+      console.log("---- Divisor increased to be: ", divisor);
+    }
+  }
+}
+
 function main() {
   var server = new grpc.Server();
 
@@ -55,7 +77,10 @@ function main() {
     greetStream: greetStream,
   });
 
-  server.addService(calc_grpc_pb.calcServiceService, { sum: sum });
+  server.addService(calc_grpc_pb.calcServiceService, {
+    sum: sum,
+    primeNumberDecomposition: primeNumberDecomposition,
+  });
 
   server.bindAsync(
     "127.0.0.1:50051",

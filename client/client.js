@@ -29,6 +29,8 @@ function call_greet_service() {
 }
 
 function call_greet_stream_service() {
+  console.log(`---- Greeting Stream Response START ----`);
+
   var greet_client = new greet_grpc_pb.GreetServiceClient(
     "localhost:50051",
     grpc.credentials.createInsecure()
@@ -86,9 +88,45 @@ function call_calc_service() {
   });
 }
 
+function call_prime_number_decomposition_service() {
+  console.log(
+    `---- Calc Prime Number Decomposition Stream Response START ----`
+  );
+  var calc_client = new calc_grpc_pb.calcServiceClient(
+    "localhost:50051",
+    grpc.credentials.createInsecure()
+  );
+  var calc_request = new calc_pb.PrimeNumberDecompositionRequest();
+  calc_request.setNumber(6);
+
+  var call = calc_client.primeNumberDecomposition(calc_request, () => {});
+
+  call.on("data", (response) => {
+    console.log(
+      "✅ Calc Prime Number Decomposition Stream Response is: ",
+      response.getDecompositionResult()
+    );
+  });
+
+  call.on("status", (status) => {
+    console.log(`---- Status is: `, status);
+  });
+
+  call.on("error", (error) => {
+    console.log(`---- error is: `, error);
+  });
+
+  call.on("end", () => {
+    console.log(
+      `---- Calc Prime Number Decomposition Stream Response END ----`
+    );
+  });
+}
+
 function main() {
   call_greet_service();
   call_greet_stream_service();
   call_calc_service();
+  call_prime_number_decomposition_service();
 }
 main();
