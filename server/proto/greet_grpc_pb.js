@@ -26,9 +26,32 @@ function deserialize_greet_GreetResponse(buffer_arg) {
   return proto_greet_pb.GreetResponse.deserializeBinary(new Uint8Array(buffer_arg));
 }
 
+function serialize_greet_GreetStreamRequest(arg) {
+  if (!(arg instanceof proto_greet_pb.GreetStreamRequest)) {
+    throw new Error('Expected argument of type greet.GreetStreamRequest');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_greet_GreetStreamRequest(buffer_arg) {
+  return proto_greet_pb.GreetStreamRequest.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
+function serialize_greet_GreetStreamResponse(arg) {
+  if (!(arg instanceof proto_greet_pb.GreetStreamResponse)) {
+    throw new Error('Expected argument of type greet.GreetStreamResponse');
+  }
+  return Buffer.from(arg.serializeBinary());
+}
+
+function deserialize_greet_GreetStreamResponse(buffer_arg) {
+  return proto_greet_pb.GreetStreamResponse.deserializeBinary(new Uint8Array(buffer_arg));
+}
+
 
 var GreetServiceService = exports.GreetServiceService = {
-  greet: {
+  // Unary API
+greet: {
     path: '/greet.GreetService/Greet',
     requestStream: false,
     responseStream: false,
@@ -38,6 +61,18 @@ var GreetServiceService = exports.GreetServiceService = {
     requestDeserialize: deserialize_greet_GreetRequest,
     responseSerialize: serialize_greet_GreetResponse,
     responseDeserialize: deserialize_greet_GreetResponse,
+  },
+  // Stream API
+greetStream: {
+    path: '/greet.GreetService/GreetStream',
+    requestStream: false,
+    responseStream: true,
+    requestType: proto_greet_pb.GreetStreamRequest,
+    responseType: proto_greet_pb.GreetStreamResponse,
+    requestSerialize: serialize_greet_GreetStreamRequest,
+    requestDeserialize: deserialize_greet_GreetStreamRequest,
+    responseSerialize: serialize_greet_GreetStreamResponse,
+    responseDeserialize: deserialize_greet_GreetStreamResponse,
   },
 };
 
