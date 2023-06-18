@@ -6,7 +6,7 @@ var greet_grpc_pb = require("../server/proto/greet_grpc_pb");
 var calc_pb = require("../server/proto/calc_pb");
 var calc_grpc_pb = require("../server/proto/calc_grpc_pb");
 
-function call_greet_service(){
+function call_greet_service() {
   var greet_client = new greet_grpc_pb.GreetServiceClient(
     "localhost:50051",
     grpc.credentials.createInsecure()
@@ -28,7 +28,39 @@ function call_greet_service(){
   });
 }
 
-function call_calc_service(){
+function call_greet_stream_service() {
+  var greet_client = new greet_grpc_pb.GreetServiceClient(
+    "localhost:50051",
+    grpc.credentials.createInsecure()
+  );
+
+  var greetObj = new greet_pb.Greeting();
+  greetObj.setFirstName("Khaled");
+  greetObj.setLastName("Allam Ahmed Abdalla");
+
+  var greet_request = new greet_pb.GreetStreamRequest();
+  greet_request.setGreeting(greetObj);
+
+  var call = greet_client.greetStream(greet_request, () => {});
+
+  call.on("data", (response) => {
+    console.log("✅ Greeting Stream Response is: ", response.getResult());
+  });
+
+  call.on("status", (status) => {
+    console.log(`---- Status is: `, status);
+  });
+
+  call.on("error", (error) => {
+    console.log(`---- error is: `, error);
+  });
+
+  call.on("end", () => {
+    console.log(`---- Greeting Stream Response END ----`);
+  });
+}
+
+function call_calc_service() {
   var calc_client = new calc_grpc_pb.calcServiceClient(
     "localhost:50051",
     grpc.credentials.createInsecure()
@@ -55,7 +87,8 @@ function call_calc_service(){
 }
 
 function main() {
-    call_greet_service();
-    call_calc_service();
+  call_greet_service();
+  call_greet_stream_service();
+  call_calc_service();
 }
 main();

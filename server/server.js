@@ -19,6 +19,24 @@ function greet(call, callback) {
   callback(null, response);
 }
 
+function greetStream(call, callback) {
+  var first_name = call.request.getGreeting().getFirstName();
+  var last_name = call.request.getGreeting().getLastName();
+
+  let count = 0;
+  setInterval(function () {
+    var response = new greet_pb.GreetStreamResponse();
+    response.setResult(count + "- Hello, " + first_name + " " + last_name);
+
+    call.write(response);
+
+    if (++count > 5) {
+      clearInterval();
+      call.end();
+    }
+  }, 1000);
+}
+
 function sum(call, callback) {
   var response = new calc_pb.SumResponse();
 
@@ -32,7 +50,11 @@ function sum(call, callback) {
 function main() {
   var server = new grpc.Server();
 
-  server.addService(greet_grpc_pb.GreetServiceService, { greet: greet });
+  server.addService(greet_grpc_pb.GreetServiceService, {
+    greet: greet,
+    greetStream: greetStream,
+  });
+
   server.addService(calc_grpc_pb.calcServiceService, { sum: sum });
 
   server.bindAsync(
