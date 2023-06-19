@@ -24,17 +24,39 @@ function greetStream(call, _callback) {
   var last_name = call.request.getGreeting().getLastName();
 
   let count = 0;
-  setInterval(function () {
-    var response = new greet_pb.GreetStreamResponse();
+  let intervalId = setInterval(function () {
+    var response = new greet_pb.GreetResponse();
     response.setResult(count + "- Hello, " + first_name + " " + last_name);
 
     call.write(response);
 
     if (++count > 5) {
-      clearInterval();
+      clearInterval(intervalId);
       call.end();
     }
   }, 1000);
+}
+
+function customGreetStream(call, _callback) {
+  call.on("data", (request) => {
+    var first_name = request.getGreeting().getFirstName();
+    var last_name = request.getGreeting().getLastName();
+    var full_name = first_name + " " + last_name;
+
+    console.log('✅ customGreetStream full_name is: ', full_name);
+  });
+
+  call.on("status", (status) => {
+    console.info(`---- customGreetStream Status is: `, status);
+  });
+
+  call.on("error", (error) => {
+    console.error(`---- customGreetStream error is: `, error);
+  });
+
+  call.on("end", () => {
+    console.info(`---- customGreetStream Response END ----`);
+  });
 }
 
 function sum(call, callback) {
@@ -75,6 +97,7 @@ function main() {
   server.addService(greet_grpc_pb.GreetServiceService, {
     greet: greet,
     greetStream: greetStream,
+    customGreetStream: customGreetStream,
   });
 
   server.addService(calc_grpc_pb.calcServiceService, {

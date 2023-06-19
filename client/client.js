@@ -40,7 +40,7 @@ function call_greet_stream_service() {
   greetObj.setFirstName("Khaled");
   greetObj.setLastName("Allam Ahmed Abdalla");
 
-  var greet_request = new greet_pb.GreetStreamRequest();
+  var greet_request = new greet_pb.GreetRequest();
   greet_request.setGreeting(greetObj);
 
   var call = greet_client.greetStream(greet_request, () => {});
@@ -50,16 +50,78 @@ function call_greet_stream_service() {
   });
 
   call.on("status", (status) => {
-    console.log(`---- Status is: `, status);
+    console.info(`---- Status is: `, status);
   });
 
   call.on("error", (error) => {
-    console.log(`---- error is: `, error);
+    console.error(`---- error is: `, error);
   });
 
   call.on("end", () => {
-    console.log(`---- Greeting Stream Response END ----`);
+    console.info(`---- Greeting Stream Response END ----`);
   });
+}
+
+function call_greet_custom_service() {
+  console.info(`---- Custom Greeting Response START ----`);
+
+  var greet_client = new greet_grpc_pb.GreetServiceClient(
+    "localhost:50051",
+    grpc.credentials.createInsecure()
+  );
+
+  var greet_request = new greet_pb.GreetRequest();
+
+  var call = greet_client.customGreetStream(
+    greet_request,
+    (error, response) => {
+      if (!error) {
+        console.log("✅ Custom Greeting Response is: ", response.getResult());
+      } else {
+        console.log("✅ Custom Greeting Response -ERROR- is: ", error);
+      }
+    }
+  );
+
+  call.on("data", (response) => {
+    console.log("✅ Custom Greeting data Response is: ", response);
+  });
+
+  call.on("status", (status) => {
+    console.info(`---- Status is: `, status);
+  });
+
+  call.on("error", (error) => {
+    console.error(`---- error is: `, error);
+  });
+
+  call.on("end", () => {
+    console.info(
+      `---- Custom Greeting Response END ----`
+    );
+  });
+
+  let i = 0;
+  let intervalId = setInterval(()=>{
+    i++;
+
+    var req = new greet_pb.GreetRequest();
+
+    var greetObj = new greet_pb.Greeting();
+    greetObj.setFirstName("Khaled-"+i);
+    greetObj.setLastName("\tAllam-"+i);
+
+    req.setGreeting(greetObj);
+
+    call.write(req);
+
+    if(i > 7){
+      clearInterval(intervalId);
+      call.end();
+    }
+  }, 1000);
+
+  console.info(`---- Custom Greeting Response END ----`);
 }
 
 function call_calc_service() {
@@ -109,15 +171,15 @@ function call_prime_number_decomposition_service() {
   });
 
   call.on("status", (status) => {
-    console.log(`---- Status is: `, status);
+    console.info(`---- Status is: `, status);
   });
 
   call.on("error", (error) => {
-    console.log(`---- error is: `, error);
+    console.error(`---- error is: `, error);
   });
 
   call.on("end", () => {
-    console.log(
+    console.info(
       `---- Calc Prime Number Decomposition Stream Response END ----`
     );
   });
@@ -126,6 +188,7 @@ function call_prime_number_decomposition_service() {
 function main() {
   call_greet_service();
   call_greet_stream_service();
+  call_greet_custom_service();
   call_calc_service();
   call_prime_number_decomposition_service();
 }

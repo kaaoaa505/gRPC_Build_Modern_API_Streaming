@@ -11,15 +11,7 @@ message GreetRequest{
     Greeting greeting = 1;
 }
 
-message GreetStreamRequest{
-    Greeting greeting = 1;
-}
-
 message GreetResponse{
-    string result = 1;
-}
-
-message GreetStreamResponse{
     string result = 1;
 }
 
@@ -27,6 +19,9 @@ service GreetService{
     // Unary API
     rpc Greet(GreetRequest) returns(GreetResponse){};
 
-    // Stream API
-    rpc GreetStream(GreetStreamRequest) returns (stream GreetStreamResponse){};
+    // Server Stream API
+    rpc GreetStream(GreetRequest) returns (stream GreetResponse){};
+
+    // Client Stream API
+    rpc CustomGreetStream(stream GreetRequest) returns (GreetResponse){};
 }
