@@ -1,10 +1,10 @@
 var grpc = require("@grpc/grpc-js");
 
-var greet_pb = require("./proto/greet_pb");
-var greet_grpc_pb = require("./proto/greet_grpc_pb");
+var greet_pb = require("../build/proto/greet_pb");
+var greet_grpc_pb = require("../build/proto/greet_grpc_pb");
 
-var calc_pb = require("./proto/calc_pb");
-var calc_grpc_pb = require("./proto/calc_grpc_pb");
+var calc_pb = require("../build/proto/calc_pb");
+var calc_grpc_pb = require("../build/proto/calc_grpc_pb");
 
 function greet(call, callback) {
   var response = new greet_pb.GreetResponse();
