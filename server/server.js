@@ -43,7 +43,7 @@ function customGreetStream(call, _callback) {
     var last_name = request.getGreeting().getLastName();
     var full_name = first_name + " " + last_name;
 
-    console.log('✅ customGreetStream full_name is: ', full_name);
+    console.log("✅ customGreetStream full_name is: ", full_name);
   });
 
   call.on("status", (status) => {
@@ -91,6 +91,37 @@ function primeNumberDecomposition(call, _callback) {
   }
 }
 
+function computeAverage(call, callback) {
+  var sum = 0;
+  var count = 0;
+
+  call.on("data", (req) => {
+    sum += req.getNumber();
+    count++;
+    console.log(`---- computeAverage number added to sum is: `, req.getNumber());
+    console.log(`---- computeAverage sum is: `, sum);
+  });
+
+  call.on("status", (status) => {
+    console.info(`---- computeAverage Status is: `, status);
+  });
+
+  call.on("error", (error) => {
+    console.error(`---- computeAverage error is: `, error);
+  });
+
+  call.on("end", () => {
+    var average = sum / count;
+
+    var response = new calc_pb.ComputeAverageResponse();
+    response.setAverageResult(average);
+
+    callback(null, response);
+
+    console.info(`---- computeAverage call END ----`);
+  });
+}
+
 function main() {
   var server = new grpc.Server();
 
@@ -103,6 +134,7 @@ function main() {
   server.addService(calc_grpc_pb.calcServiceService, {
     sum: sum,
     primeNumberDecomposition: primeNumberDecomposition,
+    computeAverage: computeAverage,
   });
 
   server.bindAsync(

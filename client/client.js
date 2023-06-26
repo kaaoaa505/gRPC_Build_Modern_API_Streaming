@@ -120,26 +120,24 @@ function call_greet_custom_service() {
   });
 
   call.on("end", () => {
-    console.info(
-      `---- Custom Greeting Response END ----`
-    );
+    console.info(`---- Custom Greeting Response END ----`);
   });
 
   let i = 0;
-  let intervalId = setInterval(()=>{
+  let intervalId = setInterval(() => {
     i++;
 
     var req = new greet_pb.GreetRequest();
 
     var greetObj = new greet_pb.Greeting();
-    greetObj.setFirstName("Khaled-"+i);
-    greetObj.setLastName("\tAllam-"+i);
+    greetObj.setFirstName("Khaled-" + i);
+    greetObj.setLastName("\tAllam-" + i);
 
     req.setGreeting(greetObj);
 
     call.write(req);
 
-    if(i > 7){
+    if (i > 7) {
       clearInterval(intervalId);
       call.end();
     }
@@ -209,11 +207,46 @@ function call_prime_number_decomposition_service() {
   });
 }
 
+function call_compute_average_service() {
+  console.log(`---- Compute Average Stream Response START ----`);
+  var calc_client = new calc_grpc_pb.calcServiceClient(
+    "localhost:50051",
+    grpc.credentials.createInsecure()
+  );
+
+  var request = new calc_pb.ComputeAverageRequest();
+  var call = calc_client.computeAverage(request, (error, response) => {
+    if(!error){
+      console.log('✅ response.getAverageResult()    ', response.getAverageResult())
+      
+    }else{
+      console.error(error);
+    }
+  });
+
+  var req1 = new calc_pb.ComputeAverageRequest();
+  var req2 = new calc_pb.ComputeAverageRequest();
+  var req3 = new calc_pb.ComputeAverageRequest();
+
+  req1.setNumber(6);
+  req2.setNumber(10);
+  req3.setNumber(20);
+
+  call.write(req1);
+  call.write(req2);
+  call.write(req3);
+
+  call.end();
+
+  console.info(`---- Compute Average Stream Response END ----`);
+}
+
 function main() {
-  call_greet_service();
-  call_greet_stream_service();
-  call_greet_custom_service();
-  call_calc_service();
-  call_prime_number_decomposition_service();
+  // call_greet_service();
+  // call_greet_stream_service();
+  // call_greet_custom_service();
+  // call_calc_service();
+  // call_prime_number_decomposition_service();
+  call_compute_average_service();
 }
 main();
