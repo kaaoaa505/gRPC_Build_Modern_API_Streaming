@@ -38,12 +38,20 @@ function call_greet_stream_service() {
 
   var greetObj = new greet_pb.Greeting();
   greetObj.setFirstName("Khaled");
-  greetObj.setLastName("Allam Ahmed Abdalla");
+  greetObj.setLastName("Allam");
+
+  var greetObj2 = new greet_pb.Greeting();
+  greetObj2.setFirstName("Ahmed");
+  greetObj2.setLastName("Omar");
 
   var greet_request = new greet_pb.GreetRequest();
   greet_request.setGreeting(greetObj);
 
+  var greet_request2 = new greet_pb.GreetRequest();
+  greet_request2.setGreeting(greetObj2);
+
   var call = greet_client.greetStream(greet_request, () => {});
+  var call2 = greet_client.greetStream(greet_request2, () => {});
 
   call.on("data", (response) => {
     console.log("✅ Greeting Stream Response is: ", response.getResult());
@@ -58,6 +66,22 @@ function call_greet_stream_service() {
   });
 
   call.on("end", () => {
+    console.info(`---- Greeting Stream Response END ----`);
+  });
+
+  call2.on("data", (response) => {
+    console.log("✅ Greeting Stream Response is: ", response.getResult());
+  });
+
+  call2.on("status", (status) => {
+    console.info(`---- Status is: `, status);
+  });
+
+  call2.on("error", (error) => {
+    console.error(`---- error is: `, error);
+  });
+
+  call2.on("end", () => {
     console.info(`---- Greeting Stream Response END ----`);
   });
 }
