@@ -216,25 +216,29 @@ function call_compute_average_service() {
 
   var request = new calc_pb.ComputeAverageRequest();
   var call = calc_client.computeAverage(request, (error, response) => {
-    if(!error){
-      console.log('✅ response.getAverageResult()    ', response.getAverageResult())
-      
-    }else{
+    if (!error) {
+      console.log(
+        "✅ response.getAverageResult()    ",
+        response.getAverageResult()
+      );
+    } else {
       console.error(error);
     }
   });
 
-  var req1 = new calc_pb.ComputeAverageRequest();
-  var req2 = new calc_pb.ComputeAverageRequest();
-  var req3 = new calc_pb.ComputeAverageRequest();
+  for (let index = 0; index < 10000; index++) {
+    var req1 = new calc_pb.ComputeAverageRequest();
+    var req2 = new calc_pb.ComputeAverageRequest();
+    var req3 = new calc_pb.ComputeAverageRequest();
 
-  req1.setNumber(6);
-  req2.setNumber(10);
-  req3.setNumber(20);
+    req1.setNumber(index);
+    req2.setNumber(10);
+    req3.setNumber(20);
 
-  call.write(req1);
-  call.write(req2);
-  call.write(req3);
+    call.write(req1);
+    call.write(req2);
+    call.write(req3);
+  }
 
   call.end();
 
