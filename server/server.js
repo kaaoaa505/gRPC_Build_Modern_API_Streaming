@@ -75,8 +75,8 @@ function primeNumberDecomposition(call, _callback) {
 
   while (num > 1 && num > divisor) {
     if (num % divisor === 0) {
-      var response = new calc_pb.PrimeNumberDecompositionResponse();
-      response.setDecompositionResult(divisor);
+      var response = new calc_pb.ComputeResponse();
+      response.setResult(divisor);
 
       num = num / divisor;
 
@@ -98,7 +98,10 @@ function computeAverage(call, callback) {
   call.on("data", (req) => {
     sum += req.getNumber();
     count++;
-    console.log(`---- computeAverage number added to sum is: `, req.getNumber());
+    console.log(
+      `---- computeAverage number added to sum is: `,
+      req.getNumber()
+    );
     console.log(`---- computeAverage sum is: `, sum);
   });
 
@@ -113,13 +116,91 @@ function computeAverage(call, callback) {
   call.on("end", () => {
     var average = sum / count;
 
-    var response = new calc_pb.ComputeAverageResponse();
-    response.setAverageResult(average);
+    var response = new calc_pb.ComputeResponse();
+    response.setResult(average);
 
     callback(null, response);
 
     console.info(`---- computeAverage call END ----`);
   });
+}
+
+function biDiGreetStream(call, _callback) {
+  var full_name = "";
+
+  setTimeout(() => {
+    call.end();
+  }, 1000);
+
+  call.on("data", (request) => {
+    var first_name = request.getGreeting().getFirstName();
+    var last_name = request.getGreeting().getLastName();
+    full_name = first_name + " " + last_name;
+
+    console.log("✅ biDiGreetStream on data full_name is: ", full_name);
+
+    var response = new greet_pb.GreetResponse();
+    response.setResult(full_name);
+
+    call.write(response);
+  });
+
+  call.on("status", (status) => {
+    console.info(`---- biDiGreetStream Status is: `, status);
+  });
+
+  call.on("error", (error) => {
+    console.error(`---- biDiGreetStream error is: `, error);
+  });
+
+  call.on("end", () => {
+    console.log("✅ biDiGreetStream on end full_name is: ", full_name);
+
+    console.info(`---- biDiGreetStream Response END ----`);
+  });
+}
+
+function computeMaximum(call, _callback) {
+  console.info(`---- computeMaximum START ----`);
+
+  var max = 0;
+
+  call.on("data", (req) => {
+    num = req.getNumber();
+
+    console.log(`---- computeMaximum num is: `, req.getNumber());
+
+    if (num > max) {
+      max = num;
+
+      var response = new calc_pb.ComputeResponse();
+      response.setResult(max);
+
+      call.write(response);
+    }
+    console.log(`---- computeMaximum max is: `, max);
+  });
+
+  call.on("status", (status) => {
+    console.info(`---- computeMaximum Status is: `, status);
+  });
+
+  call.on("error", (error) => {
+    console.error(`---- computeMaximum error is: `, error);
+  });
+
+  call.on("end", () => {
+    var response = new calc_pb.ComputeResponse();
+    response.setResult(max);
+
+    call.write(response);
+
+    call.end();
+
+    console.info(`---- computeMaximum call on end ----`);
+  });
+
+  console.info(`---- computeMaximum END ----`);
 }
 
 function main() {
@@ -129,12 +210,14 @@ function main() {
     greet: greet,
     greetStream: greetStream,
     customGreetStream: customGreetStream,
+    biDiGreetStream: biDiGreetStream,
   });
 
   server.addService(calc_grpc_pb.calcServiceService, {
     sum: sum,
     primeNumberDecomposition: primeNumberDecomposition,
     computeAverage: computeAverage,
+    computeMaximum: computeMaximum,
   });
 
   server.bindAsync(

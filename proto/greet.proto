@@ -24,4 +24,7 @@ service GreetService{
 
     // Client Stream API
     rpc CustomGreetStream(stream GreetRequest) returns (GreetResponse){};
+
+    // Bi-Directional Streaming API
+    rpc BiDiGreetStream(stream GreetRequest) returns (stream GreetResponse){};
 }

@@ -180,7 +180,7 @@ function call_prime_number_decomposition_service() {
     "localhost:50051",
     grpc.credentials.createInsecure()
   );
-  var calc_request = new calc_pb.PrimeNumberDecompositionRequest();
+  var calc_request = new calc_pb.ComputeRequest();
   calc_request.setNumber(6);
 
   var call = calc_client.primeNumberDecomposition(calc_request, () => {});
@@ -188,7 +188,7 @@ function call_prime_number_decomposition_service() {
   call.on("data", (response) => {
     console.log(
       "✅ Calc Prime Number Decomposition Stream Response is: ",
-      response.getDecompositionResult()
+      response.getResult()
     );
   });
 
@@ -214,22 +214,22 @@ function call_compute_average_service() {
     grpc.credentials.createInsecure()
   );
 
-  var request = new calc_pb.ComputeAverageRequest();
+  var request = new calc_pb.ComputeRequest();
   var call = calc_client.computeAverage(request, (error, response) => {
     if (!error) {
       console.log(
-        "✅ response.getAverageResult()    ",
-        response.getAverageResult()
+        "✅ response.getResult()    ",
+        response.getResult()
       );
     } else {
       console.error(error);
     }
   });
 
-  for (let index = 0; index < 10000; index++) {
-    var req1 = new calc_pb.ComputeAverageRequest();
-    var req2 = new calc_pb.ComputeAverageRequest();
-    var req3 = new calc_pb.ComputeAverageRequest();
+  for (let index = 0; index < 10; index++) {
+    var req1 = new calc_pb.ComputeRequest();
+    var req2 = new calc_pb.ComputeRequest();
+    var req3 = new calc_pb.ComputeRequest();
 
     req1.setNumber(index);
     req2.setNumber(10);
@@ -245,12 +245,107 @@ function call_compute_average_service() {
   console.info(`---- Compute Average Stream Response END ----`);
 }
 
+function call_bi_directional_service() {
+  console.log(`---- Bi-Directional Streaming API Client START ----`);
+  var greet_client = new greet_grpc_pb.GreetServiceClient(
+    "localhost:50051",
+    grpc.credentials.createInsecure()
+  );
+
+  var request = new greet_pb.GreetRequest();
+
+  var call = greet_client.biDiGreetStream(request, (error, response) => {
+    if (!error) {
+      console.log("✅ response.getResult()    ", response.getResult());
+    } else {
+      console.error(error);
+    }
+  });
+
+  setTimeout(() => {
+    call.end();
+  }, 2000);
+
+  for (let index = 0; index < 10; index++) {
+    var req = new greet_pb.GreetRequest();
+
+    var greetObj = new greet_pb.Greeting();
+    greetObj.setFirstName("Khaled-" + index);
+    greetObj.setLastName("\tAllam-" + index);
+
+    req.setGreeting(greetObj);
+
+    call.write(req);
+  }
+
+  call.on("status", (status) => {
+    console.info(`---- call_bi_directional_service Status is: `, status);
+  });
+
+  call.on("error", (error) => {
+    console.error(`---- call_bi_directional_service error is: `, error);
+  });
+  
+  call.on("end", () => {
+    console.info(`---- call_bi_directional_service Response END ----`);
+  });
+
+  console.info(`---- Bi-Directional Streaming API Client END ----`);
+}
+
+function call_compute_maximum_service(){
+  console.log(`---- Compute Maximum Client START ----`);
+
+  var calc_client = new calc_grpc_pb.calcServiceClient(
+    "localhost:50051",
+    grpc.credentials.createInsecure()
+  );
+
+  var request = new calc_pb.ComputeRequest();
+  var call = calc_client.computeMaximum(request, (error, response) => {
+    if (!error) {
+      console.log(
+        "✅ response.getResult()    ",
+        response.getResult()
+      );
+    } else {
+      console.error(error);
+    }
+  });
+
+  for (let index = 0; index < 10; index++) {
+    var req = new calc_pb.ComputeRequest();
+
+    req.setNumber(index);
+
+    call.write(req);
+  }
+
+  call.on("status", (status) => {
+    console.info(`---- call_compute_maximum_service Status is: `, status);
+  });
+
+  call.on("error", (error) => {
+    console.error(`---- call_compute_maximum_service error is: `, error);
+  });
+  
+  call.on("end", () => {
+    console.info(`---- call_compute_maximum_service Response END ----`);
+  });
+
+  call.end();
+
+  console.info(`---- Compute Maximum Client END ----`);
+}
+
 function main() {
-  // call_greet_service();
-  // call_greet_stream_service();
-  // call_greet_custom_service();
-  // call_calc_service();
-  // call_prime_number_decomposition_service();
+  call_greet_service();
+  call_greet_stream_service();
+  call_greet_custom_service();
+  call_calc_service();
+  call_prime_number_decomposition_service();
   call_compute_average_service();
+  call_bi_directional_service();
+  call_compute_maximum_service();
 }
 main();
